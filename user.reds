@@ -21,16 +21,18 @@ struct!:	1000
 
 ; DO NOT USE
 
-_array: func [	; create array
+array!: alias struct! [
+	length	[integer!]
+	type		[integer!]
+	cell-size	[integer!]
+	data		[byte-ptr!]
+]
+
+array: func [	; create array
 	length 	[integer!]
 	type		[integer!]
-	return: 	[struct! [
-		length	[integer!]
-		type		[integer!]
-		cell-size	[integer!]
-		data		[byte-ptr!]
-	]]
-	/local cell-size byte-length array* array
+	return: 	[array!]
+	/local cell-size byte-length data* array t-array
 ][
 	cell-size: switch type [
 		2	[4]
@@ -39,54 +41,65 @@ _array: func [	; create array
 		5	[8]
 	]
 	byte-length: length * cell-size
-	array*: allocate byte-length
-	array: declare struct! [
-		length	[integer!]
-		type		[integer!]
-		cell-size	[integer!]
-		data		[byte-ptr!]
-	]
+	data*: allocate byte-length
+	t-array: declare array!
+	array: as array! allocate size? t-array
 	array/length: byte-length
 	array/type: type
 	array/cell-size: cell-size
-	array/data: array*
+	array/data: data*
 	array
 ]
 
-_poke: func [
-	array		[struct! [
-		length	[integer!]
-		type		[integer!]
-		cell-size	[integer!]
-		data		[byte-ptr!]
-	]]
+poke: func [
+	array		[array!]
 	index		[integer!]
 	value		[byte-ptr!]
+	/local pi pf vi vf
 ][
-	print ["type:" array/type]
+	print ["type:" array/type lf]
 	switch array/type [
 		2	[
-			print ["integer!" value/value lf]
+			; NOTE: only way to pass pointer to integer! *right now*
+			; is to enclose it in struct!
+			; so we get our value from that struct!
+			; TODO: rewrite when we can use pointer! to integer!
+			vi: as struct! [value [integer!]] value
+			pi: as pointer! [integer!] array/data + (index - 1 * 4)
+			pi/value: vi/value
 		]
 		5	[
-			print ["float!" value/value lf]
+			; NOTE: only way to pass pointer to integer! *right now*
+			; is to enclose it in struct!
+			; so we get our value from that struct!
+			; TODO: rewrite when we can use pointer! to integer!
+			vf: as struct! [value [float!]] value
+			pf: as pointer! [float!] array/data + (index - 1 * 8)
+			pf/value: vf/value
 		]
 	]
 ]
 
-_pick: func [
-	array		[struct! [
-		length	[integer!]
-		type		[integer!]
-		cell-size	[integer!]
-		data		[byte-ptr!]	
-	]]
+picki: func [
+	array		[array!]
 	index		[integer!]	; 1-based offset
 	return:	[integer!]
+	/local p v
 ][
-	p: as pointer! [integer!] array/data + (index - 1 * 4) ; 4 bytes = 32 bits
+	p: as int-ptr! array/data + (index - 1 * array/cell-size)
 	p/value
 ]
+
+pickf: func [
+	array		[array!]
+	index		[integer!]	; 1-based offset
+	return:	[float!]
+	/local p v
+][
+	p: as pointer! [float!] array/data + (index - 1 * array/cell-size)
+	p/value
+]
+
 
 ; --- math 
 
@@ -136,3 +149,18 @@ equal?: func [
 		false
 	]
 ]
+
+; --- test
+
+
+a1: array 100 integer!
+vali: declare struct! [int [integer!]]
+vali/int: 2345
+poke a1 1 as byte-ptr! vali
+print ["at 1:"  picki a1 1 lf]
+
+a2: array 100 float!
+valf: declare struct! [value [float!]]
+valf/value: 3.14159
+poke a2 1 as byte-ptr! valf
+print ["at 1:" pickf a2 1 lf]
