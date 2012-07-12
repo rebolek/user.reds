@@ -51,10 +51,12 @@ array: func [	; create array
 	array
 ]
 
+; TODO: pokei and pokef ??? Probably would be easier to use...
+
 poke: func [
 	array		[array!]
 	index		[integer!]
-	value		[byte-ptr!]
+	value		[byte-ptr!]	; I use pointer here so I can pass both integer and float!
 	/local pi pf vi vf
 ][
 	print ["type:" array/type lf]
@@ -65,7 +67,7 @@ poke: func [
 			; so we get our value from that struct!
 			; TODO: rewrite when we can use pointer! to integer!
 			vi: as struct! [value [integer!]] value
-			pi: as pointer! [integer!] array/data + (index - 1 * 4)
+			pi: as pointer! [integer!] array/data + (index - 1 << 2)
 			pi/value: vi/value
 		]
 		5	[
@@ -74,10 +76,30 @@ poke: func [
 			; so we get our value from that struct!
 			; TODO: rewrite when we can use pointer! to integer!
 			vf: as struct! [value [float!]] value
-			pf: as pointer! [float!] array/data + (index - 1 * 8)
+			pf: as pointer! [float!] array/data + (index - 1 << 3)
 			pf/value: vf/value
 		]
 	]
+]
+
+pokei: func [
+	array		[array!]
+	index		[integer!]
+	value		[integer!]
+	/local p
+][
+	p: as pointer! [integer!] array/data + (index - 1 << 2)
+	p/value: value
+]
+
+pokef: func [
+	array		[array!]
+	index		[integer!]
+	value		[float!]
+	/local p
+][
+	p: as pointer! [float!] array/data + (index - 1 << 3)
+	p/value: value
 ]
 
 picki: func [
@@ -154,13 +176,9 @@ equal?: func [
 
 
 a1: array 100 integer!
-vali: declare struct! [int [integer!]]
-vali/int: 2345
-poke a1 1 as byte-ptr! vali
-print ["at 1:"  picki a1 1 lf]
+pokei a1 57 2345
+print ["at 1:"  picki a1 57 lf]
 
 a2: array 100 float!
-valf: declare struct! [value [float!]]
-valf/value: 3.14159
-poke a2 1 as byte-ptr! valf
-print ["at 1:" pickf a2 1 lf]
+pokef a2 57 3.14159
+print ["at 1:" pickf a2 57 lf]
