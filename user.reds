@@ -120,15 +120,14 @@ equal?: func [
 	string1	[c-string!]
 	string2	[c-string!]
 	return:	[logic!]
-	/local l s1 s2 i
+	/local i l s1 s2
 ][
 	l: length? string1
 	either l = (length? string2) [
-		i: 1
+		i: 0
 		while [i < l][
 			s1: string1 + i
 			s2: string2 + i
-			print [s1/1 "=" s2/1 lf]
 			unless s1/1 = s2/1 [return false]
 			i: i + 1
 		]
