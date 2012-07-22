@@ -6,20 +6,9 @@ Red/System[
 
 ; --- definitions
 
-logic!:	1
-integer!:	2
-byte!:	3
-float32!:	4
-float!:	5
-c-string!:	6
-;byte-ptr!:	7
-;int-ptr!:	8
-function!:	9
-struct!:	1000
-
+pi: 3.14159265358979
+type-int16!: 10001
 ; --- arrays
-
-; DO NOT USE
 
 array!: alias struct! [
 	length	[integer!]
@@ -35,10 +24,11 @@ array: func [	; create array
 	/local cell-size byte-length data* array t-array
 ][
 	cell-size: switch type [
-		2	[4]
-		3	[1]
-		4	[4]
-		5	[8]
+		2		[4]
+		3		[1]
+		4		[4]
+		5		[8]
+		10001	[2]
 	]
 	byte-length: length * cell-size
 	data*: allocate byte-length
@@ -50,8 +40,6 @@ array: func [	; create array
 	array/data: data*
 	array
 ]
-
-; TODO: pokei and pokef ??? Probably would be easier to use...
 
 poke: func [
 	array		[array!]
@@ -79,6 +67,9 @@ poke: func [
 			pf: as pointer! [float!] array/data + (index - 1 << 3)
 			pf/value: vf/value
 		]
+		10001	[
+		
+		]
 	]
 ]
 
@@ -90,6 +81,20 @@ pokei: func [
 ][
 	p: as pointer! [integer!] array/data + (index - 1 << 2)
 	p/value: value
+]
+
+pokeh: func [
+	array		[array!]
+	index		[integer!]
+	value		[integer!]
+	/local p
+][
+	v: declare struct! [value [integer!]]
+	v/value: value
+	v0: as byte-ptr! v
+	p: as pointer! [byte!] array/data + (index - 1 << 1)
+	p/1: v0/1
+	p/2: v0/2
 ]
 
 pokef: func [
@@ -112,6 +117,16 @@ picki: func [
 	p/value
 ]
 
+pickh: func [
+	array		[array!]
+	index		[integer!]	; 1-based offset
+	return:	[integer!]
+	/local p v
+][
+	p: as int-ptr! array/data + (index - 1 * array/cell-size)
+	256 * p/2 + p/1
+]
+
 pickf: func [
 	array		[array!]
 	index		[integer!]	; 1-based offset
@@ -125,6 +140,14 @@ pickf: func [
 
 ; --- math 
 
+fabs: func [
+	x			[float!]
+	return:	[float!]
+][
+	x: either x < 0.0 [0.0 - x][x]
+	x
+]
+
 float-to-int: func [
 	number 	[float!]
 	return:	[integer!]
@@ -136,16 +159,23 @@ float-to-int: func [
 	]
 	data/float: number + magic-number
 	ptr: as byte-ptr! data
-	ptr: ptr + 2
-	val1: as integer! ptr/value
-	ptr: ptr + 1
-	val2:  as integer! ptr/value
-	ptr: ptr + 1
-	val3:  as integer! ptr/value
-	ptr: ptr + 1
-	val4:  as integer! ptr/value
-	val1 + (256 * val2) + (65536 * val3) + (16777216 * val4)
-	
+	as integer! ptr/3
+]
+
+**: func [
+	[infix]
+	number	[integer!]
+	power	[integer!]
+	return:	[integer!]
+	/local i result
+][
+	i: 0
+	result: 1
+	while [i < power][
+		result: result * number
+		i: i + 1
+	]
+	result
 ]
 
 ; --- strings
@@ -173,12 +203,3 @@ equal?: func [
 ]
 
 ; --- test
-
-
-a1: array 100 integer!
-pokei a1 57 2345
-print ["at 1:"  picki a1 57 lf]
-
-a2: array 100 float!
-pokef a2 57 3.14159
-print ["at 1:" pickf a2 57 lf]
