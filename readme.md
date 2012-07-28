@@ -2,52 +2,8 @@
 
 ## Definitions
 
-user.reds defines datatypes as integer ids save as in Red/system compiler.
+PI
 
-## Array functions
-
-user.reds defines three functions for working with arrays.
-
-### ARRAY
-
-ARRAY creates new array.
-
-Usage:
-
-	<name>: array <length> <type>
-	
-	<length>	: length of array (number of items)
-	<type>	: datatype of array (named values from definitions can be used here
-	
-Example:
-
-	int-array: array 50 integer!
-	float-array: array 256 float!
-
-ARRAY return array struct of this structure:
-
-	array: declare struct! [
-		length	[integer!]
-		type		[integer!]
-		cell-size	[integer!]
-	]
-
-### POKE
-
-POKE stores value into array at given index.
-
-Usage:
-
-	poke <array> <index> <value>
-
-### PICK
-
-PICK reads value from array at given index.
-
-Usage:
-
-	pick <array> <index>
-	
 ## Math functions
 
 ### FLOAT-TO-INT

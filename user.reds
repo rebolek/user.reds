@@ -8,137 +8,15 @@ Red/System[
 
 pi: 3.14159265358979
 type-int16!: 10001
-; --- arrays
-
-array!: alias struct! [
-	length	[integer!]
-	type		[integer!]
-	cell-size	[integer!]
-	data		[byte-ptr!]
-]
-
-array: func [	; create array
-	length 	[integer!]
-	type		[integer!]
-	return: 	[array!]
-	/local cell-size byte-length data* array t-array
-][
-	cell-size: switch type [
-		2		[4]
-		3		[1]
-		4		[4]
-		5		[8]
-		10001	[2]
-	]
-	byte-length: length * cell-size
-	data*: allocate byte-length
-	t-array: declare array!
-	array: as array! allocate size? t-array
-	array/length: byte-length
-	array/type: type
-	array/cell-size: cell-size
-	array/data: data*
-	array
-]
-
-poke: func [
-	array		[array!]
-	index		[integer!]
-	value		[byte-ptr!]	; I use pointer here so I can pass both integer and float!
-	/local pi pf vi vf
-][
-	print ["type:" array/type lf]
-	switch array/type [
-		2	[
-			; NOTE: only way to pass pointer to integer! *right now*
-			; is to enclose it in struct!
-			; so we get our value from that struct!
-			; TODO: rewrite when we can use pointer! to integer!
-			vi: as struct! [value [integer!]] value
-			pi: as pointer! [integer!] array/data + (index - 1 << 2)
-			pi/value: vi/value
-		]
-		5	[
-			; NOTE: only way to pass pointer to integer! *right now*
-			; is to enclose it in struct!
-			; so we get our value from that struct!
-			; TODO: rewrite when we can use pointer! to integer!
-			vf: as struct! [value [float!]] value
-			pf: as pointer! [float!] array/data + (index - 1 << 3)
-			pf/value: vf/value
-		]
-		10001	[
-		
-		]
-	]
-]
-
-pokei: func [
-	array		[array!]
-	index		[integer!]
-	value		[integer!]
-	/local p
-][
-	p: as pointer! [integer!] array/data + (index - 1 << 2)
-	p/value: value
-]
-
-pokeh: func [
-	array		[array!]
-	index		[integer!]
-	value		[integer!]
-	/local p
-][
-	v: declare struct! [value [integer!]]
-	v/value: value
-	v0: as byte-ptr! v
-	p: as pointer! [byte!] array/data + (index - 1 << 1)
-	p/1: v0/1
-	p/2: v0/2
-]
-
-pokef: func [
-	array		[array!]
-	index		[integer!]
-	value		[float!]
-	/local p
-][
-	p: as pointer! [float!] array/data + (index - 1 << 3)
-	p/value: value
-]
-
-picki: func [
-	array		[array!]
-	index		[integer!]	; 1-based offset
-	return:	[integer!]
-	/local p v
-][
-	p: as int-ptr! array/data + (index - 1 * array/cell-size)
-	p/value
-]
-
-pickh: func [
-	array		[array!]
-	index		[integer!]	; 1-based offset
-	return:	[integer!]
-	/local p v
-][
-	p: as int-ptr! array/data + (index - 1 * array/cell-size)
-	256 * p/2 + p/1
-]
-
-pickf: func [
-	array		[array!]
-	index		[integer!]	; 1-based offset
-	return:	[float!]
-	/local p v
-][
-	p: as pointer! [float!] array/data + (index - 1 * array/cell-size)
-	p/value
-]
-
 
 ; --- math 
+
+abs: func[
+	x [integer!]
+	return: [integer!]
+][
+	(x xor (x >> 31)) - (x >> 31)
+]
 
 fabs: func [
 	x			[float!]
@@ -161,6 +39,57 @@ float-to-int: func [
 	ptr: as byte-ptr! data
 	as integer! ptr/3
 ]
+
+int-to-float: func [
+	n [integer!]
+	return: [float!]
+	/local sign shifts less?
+][
+	sign: 0
+	shifts: 0
+	less?: true
+
+;    1. If N is negative, negate it in two's complement. Set the high bit (2^31) of the result.
+	if n < 0 [
+		; note: FIXME: once bug #224 is fixed
+		n: 0 or not n - 1
+		sign: 1 << 31
+	]
+
+;    2. If N < 2^23, left shift it (multiply by 2) until it is greater or equal to.
+	while [n < 00800000h] [
+		less?: true
+		shifts: shifts + 1
+		n: n << 1
+	]
+
+;    3. If N >= 2^24, right shift it (unsigned divide by 2) until it is less.
+	while [n >= 01000000h] [
+		less?: false
+		shifts: shifts + 1
+		n: n >> 1
+	]
+
+;    4. Bitwise AND with ~2^23 (one's complement).
+	n: n and not 00800000h
+
+;    5. If it was less, subtract the number of left shifts from 150 (127+23).
+	if all [less? 0 < shifts][
+		shifts: 150 - shifts
+	]
+
+;    6. If it was more, add the number of right shifts to 150.
+	if all [not less? 0 < shifts][
+		shifts: 150 + shifts
+	]
+;    7. This new number is the exponent. Left shift it by 23 and add it to the number from step 3.
+	shifts: shifts << 23
+	n + shifts
+	
+;	hack to convert float32! to float64!
+	0.0 + as float32! sign or n + shifts
+]
+
 
 **: func [
 	[infix]
@@ -200,6 +129,35 @@ equal?: func [
 	][
 		false
 	]
+]
+
+find: func[
+	string	[c-string!]
+	match	[c-string!]
+	return:	[c-string!]	; return index 
+	/local substring match?
+][
+	out: string
+	substring: string
+	match?: false
+	until [
+		if match/1 = string/1 [
+			match?: true
+			substring: string
+			until [
+				if match/1 <> substring/1 [match?: false]
+				match: match + 1
+				substring: substring + 1
+				null-byte = match/1
+			]
+			if match? [
+				return string
+			]
+		]
+		string: string + 1
+		string/1 = null-byte
+	]
+	return ""
 ]
 
 ; --- test
