@@ -36,8 +36,13 @@ float-to-int: func [
 		float [float!]
 	]
 	data/float: number + magic-number
+	; TODO: simplify this!
 	ptr: as byte-ptr! data
-	as integer! ptr/3
+	val1: as integer! ptr/3
+	val2: as integer! ptr/4
+	val3: as integer! ptr/5
+	val4: as integer! ptr/6
+	(16777216 * val4) + (65536 * val3) + (256 * val2) + val1
 ]
 
 int-to-float: func [
@@ -84,7 +89,7 @@ int-to-float: func [
 	]
 ;    7. This new number is the exponent. Left shift it by 23 and add it to the number from step 3.
 	shifts: shifts << 23
-	n + shifts
+;	n + shifts
 	
 ;	hack to convert float32! to float64!
 	0.0 + as float32! sign or n + shifts
