@@ -29,7 +29,7 @@ fabs: func [
 float-to-int: func [
 	number 	[float!]
 	return:	[integer!]
-	/local magic-number data ptr val1 val2 val3 val4
+	/local magic-number data ptr
 ][
 	magic-number: 68719476736.0 * 1.5
 	data: declare struct! [
