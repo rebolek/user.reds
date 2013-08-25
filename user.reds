@@ -1,7 +1,7 @@
 Red/System[
 	Title: "user.reds" 
 	Author: "Boleslav Brezovsky" 
-	Date: 12-7-2012
+	Date: 25-8-2013
 ]
 
 ; --- definitions
@@ -56,8 +56,7 @@ int-to-float: func [
 
 ;    1. If N is negative, negate it in two's complement. Set the high bit (2^31) of the result.
 	if n < 0 [
-		; note: FIXME: once bug #224 is fixed
-		n: 0 or not n - 1
+		n: not n
 		sign: 1 << 31
 	]
 
@@ -142,7 +141,6 @@ find: func[
 	return:	[c-string!]	; return index 
 	/local substring match?
 ][
-	out: string
 	substring: string
 	match?: false
 	until [
@@ -164,5 +162,3 @@ find: func[
 	]
 	return ""
 ]
-
-; --- test
