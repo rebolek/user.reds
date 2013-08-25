@@ -162,3 +162,19 @@ find: func[
 	]
 	return ""
 ]
+
+count-char: function [
+	"Count character occurrence in string"
+	string	[c-string!]
+	char 	[byte!]
+	return:	[integer!]
+	/local count index length
+][
+	count: 0
+	until [
+		if string/1 = char [count: count + 1]
+		string: string + 1
+		string/1 = null-byte
+	]
+	count
+]
