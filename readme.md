@@ -1,5 +1,7 @@
 # user.reds
 
+User.reds is collection of useful functions and definitions. This file is distributed under public domain.
+
 ## Definitions
 
 PI
