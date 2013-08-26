@@ -1,6 +1,6 @@
 # user.reds
 
-User.reds is collection of useful functions and definitions. This file is distributed under public domain.
+User.reds is collection of useful functions and definitions.
 
 ## Definitions
 
@@ -64,4 +64,15 @@ Usage:
 	find "Hello world!" "world"
 	== "world!"
 
-That's all for now.
+### COUNT-CHAR
+
+Count character occurrence in string.
+
+Usage: 
+
+	count-char "There are three spaces" #" "
+	== 3
+
+## License
+
+This file is distributed under same [BSL license](https://github.com/rebolek/user.reds/blob/master/BSL-license.txt) as Red/System runtime.
