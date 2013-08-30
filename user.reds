@@ -112,9 +112,12 @@ int-to-float: func [
 	result
 ]
 
+
+
+; =================================
 ; --- strings
 
-equal?: func [
+equal-string?: func [
 	; compare two strings
 	string1	[c-string!]
 	string2	[c-string!]
@@ -136,7 +139,7 @@ equal?: func [
 	]
 ]
 
-find: func[
+find-string: func[
 	string	[c-string!]
 	match	[c-string!]
 	return:	[c-string!]	; return index 
@@ -164,22 +167,6 @@ find: func[
 	return ""
 ]
 
-count-char: function [
-	"Count character occurrence in string"
-	string	[c-string!]
-	char 	[byte!]
-	return:	[integer!]
-	/local count index length
-][
-	count: 0
-	until [
-		if string/1 = char [count: count + 1]
-		string: string + 1
-		string/1 = null-byte
-	]
-	count
-]
-
 reverse-string: func [
 	data	[c-string!]
 	return:	[c-string!]
@@ -196,6 +183,22 @@ reverse-string: func [
 		i > len
 	]
 	out
+]
+
+count-char: function [
+	"Count character occurrence in string"
+	string	[c-string!]
+	char 	[byte!]
+	return:	[integer!]
+	/local count index length
+][
+	count: 0
+	until [
+		if string/1 = char [count: count + 1]
+		string: string + 1
+		string/1 = null-byte
+	]
+	count
 ]
 
 form-int: func [
