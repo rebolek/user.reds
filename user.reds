@@ -8,6 +8,7 @@ Red/System[
 
 pi: 3.14159265358979
 type-int16!: 10001
+crlf: "^M^/"
 
 ; --- math 
 
@@ -177,4 +178,41 @@ count-char: function [
 		string/1 = null-byte
 	]
 	count
+]
+
+reverse-string: func [
+	data	[c-string!]
+	return:	[c-string!]
+	/local len out i j
+][
+	len: length? data
+	out: as c-string! allocate len
+	i: 1
+	j: len
+	until [
+		out/i: data/j
+		j: j - 1
+		i: i + 1
+		i > len
+	]
+	out
+]
+
+form-int: func [
+	"Return integer! as c-string!"
+	number	[integer!]
+	return:	[c-string!]
+	/local out i 
+][
+	remainder: number
+	out: as c-string! allocate 10 ; 32bit number
+	i: 1
+	until [
+		out/i: as byte! 48 + as integer! number // 10
+		number: number / 10
+		i: i + 1
+		number = 0
+	]
+	out/i: #"^(00)"	; force end of string
+	reverse-string out
 ]
