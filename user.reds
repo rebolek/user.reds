@@ -112,7 +112,12 @@ int-to-float: func [
 	result
 ]
 
-
+negate: function [
+	value	[integer!]
+	return:	[integer!]
+][
+	1 + not value
+]
 
 ; =================================
 ; --- strings
@@ -259,4 +264,34 @@ form-int: func [
 	]
 	out/i: #"^(00)"	; force end of string
 	reverse-string out
+]
+
+load-int: func [
+	"Load integer value from string"
+	value	[c-string!]
+	return:	[integer!]
+	/local
+	out		[integer!]
+	negate?	[logic!]
+	index	[integer!]
+	length 	[integer!]
+	mult 	[integer!]
+][
+	out: 0
+	negate?: false
+	; check for minus sign
+	if #"-" = value/1 [
+		negate?: true
+		value: value + 1
+	] 
+	length: length? value
+	index: length
+	mult: 1
+	until [
+		out: out + ((as integer! value/index) - 48 * mult)
+		mult: mult * 10
+		index: index - 1
+		index = 0
+	]
+	out
 ]
