@@ -284,6 +284,7 @@ load-int: func [
 		negate?: true
 		value: value + 1
 	] 
+	; main loop
 	length: length? value
 	index: length
 	mult: 1
@@ -293,5 +294,7 @@ load-int: func [
 		index: index - 1
 		index = 0
 	]
+	; negate when necessary
+	if negate? [out: negate out]
 	out
 ]
