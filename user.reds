@@ -185,6 +185,46 @@ reverse-string: func [
 	out
 ]
 
+change-string: function [
+	"Change target string with value at index"
+	target	[c-string!]
+	value 	[c-string!]
+	return:	[c-string!]
+	/local
+		start 	[c-string!]
+][
+	; TODO: check limits
+	start: target
+	until [
+		target/1: value/1
+		value: value + 1
+		target: target + 1
+		value/1 = null-byte
+	]
+	start
+]
+
+change-string-at: function [
+	"Change target string with value at index"
+	target	[c-string!]
+	value 	[c-string!]
+	index 	[integer!]
+	return:	[c-string!]
+	/local
+		start 	[c-string!]
+][
+	; TODO: check limits
+	start: target
+	target: target + index - 1
+	until [
+		target/1: value/1
+		value: value + 1
+		target: target + 1
+		value/1 = null-byte
+	]
+	start
+]
+
 count-char: function [
 	"Count character occurrence in string"
 	string	[c-string!]
@@ -207,6 +247,7 @@ form-int: func [
 	return:	[c-string!]
 	/local out i 
 ][
+	; TODO: negative numbers
 	remainder: number
 	out: as c-string! allocate 10 ; 32bit number
 	i: 1
