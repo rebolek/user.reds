@@ -122,6 +122,20 @@ negate: function [
 ; =================================
 ; --- strings
 
+next: func [
+	string 	[c-string!]
+	return:	[c-string!]
+][
+	string + 1
+]
+
+back: func [
+	string 	[c-string!]
+	return:	[c-string!]
+][
+	string - 1
+]
+
 equal-string?: func [
 	; compare two strings
 	string1	[c-string!]

@@ -6,6 +6,8 @@ User.reds is collection of useful functions and definitions.
 
 PI
 
+CRLF
+
 ## Math functions
 
 ### FLOAT-TO-INT
@@ -14,7 +16,8 @@ Converts float! value to integer!
 
 Usage:
 
-	int-value: float-to-int float-value
+	float-to-int 3.14
+	== 3
 
 ### INT-TO-FLOAT
 
@@ -22,8 +25,28 @@ Converts integer! value to float!
 
 Usage:
 
-	float-value: int-to-float int-value
+	int-to-float 3
+	== 3.0
+
+### LOAD-INT
+
+Converts string to integer!
+
+Usage:
 	
+	load-int "123"
+	== 123
+
+### FORM-INT
+
+Converts integer! to readable string
+
+Usage:
+
+	form-int 123
+	== "123"
+
+
 ### ABS, FABS
 
 Return absolute value of number (integer! and float! version)
@@ -43,26 +66,63 @@ Return x power y (integer! version only)
 Usage:
 
 	2 ** 3
-	==8
+	== 8
+
+### NEGATE
+
+Negate integer! number
+
+	negate 23
+	== -23
 
 ## String functions
 
-### EQUAL?
+### NEXT, BACK
+
+Move one position forward or backward in string.
+**NOTE:** This is just simple pointer arithmetics and doesn't check for boundaries!
+
+Usage:
+
+	next "adamov"
+	== "damov"
+
+### EQUAL-STRING?
 
 Compares two strings.
 
 Usage:
 
-	equal? string-1 string-2
+	equal-string? string-1 string-2
 
-### FIND
+### FIND-STRING
 
 Find substring in string.
 
 Usage:
 
-	find "Hello world!" "world"
+	find-string "Hello world!" "world"
 	== "world!"
+
+### REVERSE-STRING
+
+Return new string that is reversed copy of original string
+
+Usage:
+
+	reverse-string "BRNO"
+	== "ONRB"
+
+### CHANGE-STRING, CHANGE-STRING-AT
+
+Change begining of the string with new value, or change string at index with new value
+
+Usage:
+
+	change-string "Rebol" "Red"
+	== "Redol"
+	change-string-at "Rebol" "d" 3
+	== "Redol"
 
 ### COUNT-CHAR
 
@@ -72,6 +132,7 @@ Usage:
 
 	count-char "There are three spaces" #" "
 	== 3
+
 
 ## License
 
