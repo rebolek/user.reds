@@ -192,26 +192,29 @@ find-string: func [
 	return:	[c-string!]	; return index 
 	/local substring match?
 ][
-	substring: string
-	match?: false
+	; main loop
 	until [
-		if match/1 = string/1 [
-			match?: true
-			substring: string
-			until [
-				if match/1 <> substring/1 [match?: false]
-				match: match + 1
-				substring: substring + 1
-				null-byte = match/1
-			]
-			if match? [
-				return string
-			]
+		if match-string string match [
+			return string
 		]
-		string: string + 1
+	;	end condition
+		string: next string
 		string/1 = null-byte
 	]
-	return ""
+	; no match, return empty string
+	""
+]
+
+copy-string-to: func [
+	""
+	data	[c-string!]
+	match 	[c-string!]
+;	return: [c-string!]
+;	return:	[integer!]
+	return: [byte-ptr!]
+][
+	end: find-string data match
+	as byte-ptr! end - data
 ]
 
 reverse-string: func [
