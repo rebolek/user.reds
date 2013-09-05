@@ -8,7 +8,7 @@ Red/System[
 
 		Substring struct! is defined in following format:
 
-		struct/length 	- number of substrings
+		struct/count 	- number of substrings
 		struct/start 	- pointer to array of pointers to substring starts
 		struct/length 	- pointer to array of pointers to substring lengths
 		struct/data 	- pointer to original string
@@ -28,7 +28,7 @@ Red/System[
 ; define SUBSTRING structure:
 
 sb-string!: alias struct! [
-	length		[integer!]				; number of items
+	count		[integer!]				; number of items
 	start		[pointer! [integer!]]	; pointer to item starts
 	length		[pointer! [integer!]]	; pointer to item lengths
 	data		[pointer! [integer!]]	; pointer to item contents
@@ -58,19 +58,19 @@ sb-split-to-buffer: function [
 ][
 	orig: string
 	ret: as sb-string! allocate size? sb-string!
-	ret/length:	0	; matched CHAR values in STRING 
+	ret/count:	0	; matched CHAR values in STRING 
 	overflow?: false
 	ret/start: as int-ptr! allocate buffer-size * size? integer!
 	ret/length: as int-ptr! allocate buffer-size * size? integer!
 	ret/start/1: as integer! string
 	until [
 		if string/1 = char [
-			ret/length: ret/length + 1
-			either ret/length > buffer-size [
+			ret/count: ret/count + 1
+			either ret/count > buffer-size [
 				overflow?: true
 			][
-				index: ret/length
-				next: ret/length + 1
+				index: ret/count
+				next: ret/count + 1
 				ret/start/next: as integer! string + 1
 				ret/length/index: ret/start/next - ret/start/index - 1 ; also subtract matched char from length 
 			]
@@ -81,13 +81,13 @@ sb-split-to-buffer: function [
 	]
 	; set last length
 	ret/length: ret/length + 1
-	index: ret/length
+	index: ret/count
 	ret/length/index: (as integer! string) - ret/start/index
 
 	if overflow? [
 		; This should free old small buffer before allocating new
 		; Why it does require byte-ptr! ?
-		index: ret/length 					; store buffer size
+		index: ret/count 					; store buffer size
 		free as byte-ptr! ret
 		ret: sb-split-to-buffer orig char index
 	]

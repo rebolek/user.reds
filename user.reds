@@ -1,7 +1,7 @@
 Red/System[
 	Title: "user.reds" 
 	Author: "Boleslav Brezovsky" 
-	Date: 25-8-2013
+	Date: 5-9-2013
 ]
 
 ; --- definitions
@@ -158,7 +158,36 @@ equal-string?: func [
 	]
 ]
 
-find-string: func[
+end?: func [
+	"Returns TRUE when first byte of the string is null-byte"
+	string 		[c-string!]
+	return:		[logic!]
+][
+	string/1 = null-byte
+]
+
+match-string: func [
+	"Check if the beginning of the string matches given substring"
+	string 		[c-string!]
+	substring	[c-string!]
+	return:		[logic!]
+	/local
+	matched?	[logic!]
+	i 			[integer!]
+][
+	matched?: true
+	; main loop 
+	until [
+
+	; end condition
+		substring: next substring
+		end? substring
+	]
+	true
+]
+
+find-string: func [
+	"Find substring in string"
 	string	[c-string!]
 	match	[c-string!]
 	return:	[c-string!]	; return index 
