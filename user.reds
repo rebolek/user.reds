@@ -209,12 +209,17 @@ copy-string-to: func [
 	""
 	data	[c-string!]
 	match 	[c-string!]
-;	return: [c-string!]
+	return: [c-string!]
 ;	return:	[integer!]
-	return: [byte-ptr!]
+;	return: [byte-ptr!]
+	/local
+	length 	[integer!]
 ][
 	end: find-string data match
-	as byte-ptr! end - data
+	length: as integer! end - data
+	out: as c-string! allocate length
+;	copy-memory as byte-ptr! string as byte-ptr! data/start/index data/length/index	
+	as c-string! copy-memory as byte-ptr! out as byte-ptr! data length
 ]
 
 reverse-string: func [
