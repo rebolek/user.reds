@@ -171,15 +171,14 @@ match-string: func [
 	string 		[c-string!]
 	substring	[c-string!]
 	return:		[logic!]
-	/local
-	matched?	[logic!]
-	i 			[integer!]
 ][
-	matched?: true
 	; main loop 
 	until [
-
+		if string/1 <> substring/1 [
+			return false
+		]
 	; end condition
+		string: next string
 		substring: next substring
 		end? substring
 	]
@@ -300,7 +299,7 @@ form-int: func [
 	out: as c-string! allocate 10 ; 32bit number
 	i: 1
 	until [
-		out/i: as byte! 48 + as integer! number // 10
+		out/i: as byte! 48 + (number // 10)
 		number: number / 10
 		i: i + 1
 		number = 0
