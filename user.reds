@@ -95,6 +95,16 @@ int-to-float: func [
 	0.0 + as float32! sign or n + shifts
 ]
 
+int-to-byte: func [
+	number		[integer!]
+	return:		[byte!]
+	/local
+	pointer 	[byte-ptr!]
+][
+	pointer: as byte-ptr! :number
+	pointer/value
+]
+
 
 **: func [
 	[infix]
@@ -118,6 +128,7 @@ negate: function [
 ][
 	1 + not value
 ]
+
 
 ; =================================
 ; --- strings
@@ -210,15 +221,12 @@ copy-string-to: func [
 	data	[c-string!]
 	match 	[c-string!]
 	return: [c-string!]
-;	return:	[integer!]
-;	return: [byte-ptr!]
 	/local
 	length 	[integer!]
 ][
 	end: find-string data match
 	length: as integer! end - data
 	out: as c-string! allocate length
-;	copy-memory as byte-ptr! string as byte-ptr! data/start/index data/length/index	
 	as c-string! copy-memory as byte-ptr! out as byte-ptr! data length
 ]
 
@@ -241,7 +249,7 @@ reverse-string: func [
 ]
 
 change-string: function [
-	"Change target string with value at index"
+	"Change target string with value at beginning"
 	target	[c-string!]
 	value 	[c-string!]
 	return:	[c-string!]
@@ -347,4 +355,35 @@ load-int: func [
 	; negate when necessary
 	if negate? [out: negate out]
 	out
+]
+
+load-digit: func [
+	value 	[byte!]
+	return: [integer!]
+][
+	(as integer! value) - 48
+]
+
+load-byte: func [
+	"Load byte value (0-255) from string"
+	value 	[c-string!]
+	return: [byte!]
+	/local
+	out 	[integer!]
+	length 	[integer!]
+][
+	out: 0
+	length: length? value 
+	out: switch length [
+		1 	[
+			load-digit value/1
+		]
+		2 	[
+			(10 * load-digit value/1) + load-digit value/2
+		]
+		3 	[
+			(100 * load-digit value/1) + (10 * load-digit value/2) + load-digit value/3
+		]
+	]
+	int-to-byte out 
 ]

@@ -54,15 +54,16 @@ sb-split-to-buffer: function [
 	char 		[byte!]
 	buffer-size	[integer!]
 	return:		[sb-string!]
-	/local orig overflow? index next ret
+	/local orig overflow? index next-index ret
 ][
 	orig: string
 	ret: as sb-string! allocate size? sb-string!
-	ret/count:	0	; matched CHAR values in STRING 
+	ret/count:	0
 	overflow?: false
 	ret/start: as int-ptr! allocate buffer-size * size? integer!
 	ret/length: as int-ptr! allocate buffer-size * size? integer!
 	ret/start/1: as integer! string
+	; main loop
 	until [
 		if string/1 = char [
 			ret/count: ret/count + 1
@@ -70,17 +71,17 @@ sb-split-to-buffer: function [
 				overflow?: true
 			][
 				index: ret/count
-				next: ret/count + 1
-				ret/start/next: as integer! string + 1
-				ret/length/index: ret/start/next - ret/start/index - 1 ; also subtract matched char from length 
+				next-index: ret/count + 1
+				ret/start/next-index: as integer! string + 1
+				ret/length/index: ret/start/next-index - ret/start/index - 1 ; also subtract matched char from length 
 			]
 		]
 	; end condition	
 		string: string + 1
 		string/1 = null-byte
 	]
-	; set last length
-	ret/length: ret/length + 1
+	; set last count
+	ret/count: ret/count + 1
 	index: ret/count
 	ret/length/index: (as integer! string) - ret/start/index
 
