@@ -10,43 +10,6 @@ CRLF
 
 ## Math functions
 
-### FLOAT-TO-INT
-
-Converts float! value to integer!
-
-Usage:
-
-	float-to-int 3.14
-	== 3
-
-### INT-TO-FLOAT
-
-Converts integer! value to float!
-
-Usage:
-
-	int-to-float 3
-	== 3.0
-
-### LOAD-INT
-
-Converts string to integer!
-
-Usage:
-	
-	load-int "123"
-	== 123
-
-### FORM-INT
-
-Converts integer! to readable string
-
-Usage:
-
-	form-int 123
-	== "123"
-
-
 ### ABS, FABS
 
 Return absolute value of number (integer! and float! version)
@@ -75,6 +38,63 @@ Negate integer! number
 	negate 23
 	== -23
 
+## Conversion
+
+
+### FLOAT-TO-INT
+
+Converts float! value to integer!
+
+Usage:
+
+	float-to-int 3.14
+	== 3
+
+### INT-TO-FLOAT
+
+Converts integer! value to float!
+
+Usage:
+
+	int-to-float 3
+	== 3.0
+
+### FORM-INT
+
+Converts integer! to readable string
+
+Usage:
+
+	form-int 123
+	== "123"
+
+### LOAD-INT
+
+Converts string to integer!
+
+Usage:
+	
+	load-int "123"
+	== 123
+
+### LOAD-DIGIT
+
+Convert string with single digit (0-9) to byte!
+
+Usage:
+
+	load-byte "6"
+	== 6
+
+### LOAD-BYTE
+
+Convert string with byte value (0-255) to byte!
+
+Usage:
+
+	load-byte "123"
+	== 123	
+
 ## String functions
 
 ### NEXT, BACK
@@ -87,6 +107,15 @@ Usage:
 	next "adamov"
 	== "damov"
 
+### END?
+
+Check if first value of given c-string! is null-byte
+
+Usage:
+
+	end? next "x"
+	== true
+
 ### EQUAL-STRING?
 
 Compares two strings.
@@ -94,6 +123,15 @@ Compares two strings.
 Usage:
 
 	equal-string? string-1 string-2
+
+### MATCH-STRING
+
+Check if the beginnign of string is same other string.
+
+Usage:
+
+	match-string "Hello world!" "Hello"
+	== true
 
 ### FIND-STRING
 
@@ -124,6 +162,16 @@ Usage:
 	change-string-at "Rebol" "d" 3
 	== "Redol"
 
+### COPY-STRING-TO
+
+Copy substring to given match
+
+Usage:
+
+	copy-string-to "Hello, World" ","
+	== "Hello"
+
+
 ### COUNT-CHAR
 
 Count character occurrence in string.
@@ -132,7 +180,6 @@ Usage:
 
 	count-char "There are three spaces" #" "
 	== 3
-
 
 ## License
 
