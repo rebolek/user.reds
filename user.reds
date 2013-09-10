@@ -27,6 +27,34 @@ fabs: func [
 	x
 ]
 
+**: func [
+	[infix]
+	number	[integer!]
+	power	[integer!]
+	return:	[integer!]
+	/local i result
+][
+	i: 0
+	result: 1
+	while [i < power][
+		result: result * number
+		i: i + 1
+	]
+	result
+]
+
+negate: function [
+	value	[integer!]
+	return:	[integer!]
+][
+	1 + not value
+]
+
+
+; =================================
+; --- conversion
+
+
 float-to-int: func [
 	number 	[float!]
 	return:	[integer!]
@@ -105,33 +133,97 @@ int-to-byte: func [
 	pointer/value
 ]
 
-
-**: func [
-	[infix]
+form-int: func [
+	"Return integer! as c-string!"
 	number	[integer!]
-	power	[integer!]
-	return:	[integer!]
-	/local i result
+	return:	[c-string!]
+	/local out i 
 ][
-	i: 0
-	result: 1
-	while [i < power][
-		result: result * number
+	; TODO: negative numbers
+	remainder: number
+	out: as c-string! allocate 10 ; 32bit number
+	i: 1
+	until [
+		out/i: as byte! 48 + (number // 10)
+		number: number / 10
 		i: i + 1
+		number = 0
 	]
-	result
+	out/i: #"^(00)"	; force end of string
+	reverse-string out
 ]
 
-negate: function [
-	value	[integer!]
+load-int: func [
+	"Load integer value from string"
+	value	[c-string!]
 	return:	[integer!]
+	/local
+	out		[integer!]
+	negate?	[logic!]
+	index	[integer!]
+	length 	[integer!]
+	mult 	[integer!]
 ][
-	1 + not value
+	out: 0
+	negate?: false
+	; check for minus sign
+	if #"-" = value/1 [
+		negate?: true
+		value: value + 1
+	] 
+	; main loop
+	length: length? value
+	index: length
+	mult: 1
+	until [
+;		out: out + ((as integer! value/index) - 48 * mult)
+		out: out + (mult * load-digit value/index)
+		mult: mult * 10
+		index: index - 1
+		index = 0
+	]
+	; negate when necessary
+	if negate? [out: negate out]
+	out
+]
+
+load-digit: func [
+	"Load single digit value (0-9) as integer!"
+	value 	[byte!]
+	return: [integer!]
+][
+	(as integer! value) - 48
+]
+
+load-byte: func [
+	"Load byte value (0-255) from c-string!"
+	value 	[c-string!]
+	return: [byte!]
+	/local
+	out 	[integer!]
+	length 	[integer!]
+][
+	out: 0
+	length: length? value 
+	out: switch length [
+		1 	[
+			load-digit value/1
+		]
+		2 	[
+			(10 * load-digit value/1) + load-digit value/2
+		]
+		3 	[
+			(100 * load-digit value/1) + (10 * load-digit value/2) + load-digit value/3
+		]
+	]
+	int-to-byte out 
 ]
 
 
 ; =================================
 ; --- strings
+
+; TODO: NEXT, BACK, END?... should be macros (when available)
 
 next: func [
 	string 	[c-string!]
@@ -146,6 +238,15 @@ back: func [
 ][
 	string - 1
 ]
+
+end?: func [
+	"Returns TRUE when first byte of the string is null-byte"
+	string 		[c-string!]
+	return:		[logic!]
+][
+	string/1 = null-byte
+]
+
 
 equal-string?: func [
 	; compare two strings
@@ -167,14 +268,6 @@ equal-string?: func [
 	][
 		false
 	]
-]
-
-end?: func [
-	"Returns TRUE when first byte of the string is null-byte"
-	string 		[c-string!]
-	return:		[logic!]
-][
-	string/1 = null-byte
 ]
 
 match-string: func [
@@ -302,88 +395,4 @@ count-char: function [
 		string/1 = null-byte
 	]
 	count
-]
-
-form-int: func [
-	"Return integer! as c-string!"
-	number	[integer!]
-	return:	[c-string!]
-	/local out i 
-][
-	; TODO: negative numbers
-	remainder: number
-	out: as c-string! allocate 10 ; 32bit number
-	i: 1
-	until [
-		out/i: as byte! 48 + (number // 10)
-		number: number / 10
-		i: i + 1
-		number = 0
-	]
-	out/i: #"^(00)"	; force end of string
-	reverse-string out
-]
-
-load-int: func [
-	"Load integer value from string"
-	value	[c-string!]
-	return:	[integer!]
-	/local
-	out		[integer!]
-	negate?	[logic!]
-	index	[integer!]
-	length 	[integer!]
-	mult 	[integer!]
-][
-	out: 0
-	negate?: false
-	; check for minus sign
-	if #"-" = value/1 [
-		negate?: true
-		value: value + 1
-	] 
-	; main loop
-	length: length? value
-	index: length
-	mult: 1
-	until [
-		out: out + ((as integer! value/index) - 48 * mult)
-		mult: mult * 10
-		index: index - 1
-		index = 0
-	]
-	; negate when necessary
-	if negate? [out: negate out]
-	out
-]
-
-load-digit: func [
-	value 	[byte!]
-	return: [integer!]
-][
-	(as integer! value) - 48
-]
-
-load-byte: func [
-	"Load byte value (0-255) from string"
-	value 	[c-string!]
-	return: [byte!]
-	/local
-	out 	[integer!]
-	length 	[integer!]
-][
-	out: 0
-	length: length? value 
-	out: switch length [
-		1 	[
-			load-digit value/1
-		]
-		2 	[
-			(10 * load-digit value/1) + load-digit value/2
-		]
-		3 	[
-			(100 * load-digit value/1) + (10 * load-digit value/2) + load-digit value/3
-		]
-	]
-	int-to-byte out 
 ]
