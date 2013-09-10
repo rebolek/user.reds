@@ -86,9 +86,8 @@ sb-split-to-buffer: function [
 	ret/length/index: (as integer! string) - ret/start/index
 
 	if overflow? [
-		; This should free old small buffer before allocating new
-		; Why it does require byte-ptr! ?
-		index: ret/count 					; store buffer size
+		; Free old small buffer before allocating new
+		index: ret/count 
 		free as byte-ptr! ret
 		ret: sb-split-to-buffer orig char index
 	]
@@ -96,7 +95,7 @@ sb-split-to-buffer: function [
 ]
 
 sb-pick: function [
-	"Pick substring from struct returned by SPLIT"
+	"Return copy of substring."
 	data	[sb-string!]	"Struct with substring informations"
 	index	[integer!]	"Index of substring"
 	return:	[c-string!]
