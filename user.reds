@@ -225,27 +225,10 @@ load-byte: func [
 
 ; TODO: NEXT, BACK, END?... should be macros (when available)
 
-next: func [
-	string 	[c-string!]
-	return:	[c-string!]
-][
-	string + 1
-]
-
-back: func [
-	string 	[c-string!]
-	return:	[c-string!]
-][
-	string - 1
-]
-
-end?: func [
-	"Returns TRUE when first byte of the string is null-byte"
-	string 		[c-string!]
-	return:		[logic!]
-][
-	string/1 = null-byte
-]
+#define next(string)(string + 1)
+#define back(string)(string - 1)
+#define tail?(string)(string/1 = null-byte)
+#define end?(string)(string/1 = null-byte)
 
 
 equal-string?: func [
