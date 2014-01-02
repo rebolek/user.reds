@@ -1,6 +1,6 @@
 Red/System[
-	Title: "user.reds" 
-	Author: "Boleslav Brezovsky" 
+	Title: "user.reds"
+	Author: "Boleslav Brezovsky"
 	Date: 5-9-2013
 ]
 
@@ -10,7 +10,7 @@ pi: 3.14159265358979
 type-int16!: 10001
 crlf: "^M^/"
 
-; --- math 
+; --- math
 
 abs: func[
 	x [integer!]
@@ -20,7 +20,7 @@ abs: func[
 ]
 
 fabs: func [
-	x			[float!]
+	x		[float!]
 	return:	[float!]
 ][
 	x: either x < 0.0 [0.0 - x][x]
@@ -83,10 +83,16 @@ int-to-float: func [
 	shifts: 0
 	less?: true
 
+;	0. if N = 0  we dont need to compute value  so returns 0
+	if n = 0 [
+		return 0.0
+	]
+
 ;    1. If N is negative, negate it in two's complement. Set the high bit (2^31) of the result.
 	if n < 0 [
 		n: not n
 		sign: 1 << 31
+		n: n + 1
 	]
 
 ;    2. If N < 2^23, left shift it (multiply by 2) until it is greater or equal to.
@@ -118,7 +124,7 @@ int-to-float: func [
 ;    7. This new number is the exponent. Left shift it by 23 and add it to the number from step 3.
 	shifts: shifts << 23
 ;	n + shifts
-	
+
 ;	hack to convert float32! to float64!
 	0.0 + as float32! sign or n + shifts
 ]
@@ -137,7 +143,7 @@ form-int: func [
 	"Return integer! as c-string!"
 	number	[integer!]
 	return:	[c-string!]
-	/local out i 
+	/local out i
 ][
 	; TODO: negative numbers
 	remainder: number
@@ -170,13 +176,12 @@ load-int: func [
 	if #"-" = value/1 [
 		negate?: true
 		value: value + 1
-	] 
+	]
 	; main loop
 	length: length? value
 	index: length
 	mult: 1
 	until [
-;		out: out + ((as integer! value/index) - 48 * mult)
 		out: out + (mult * load-digit value/index)
 		mult: mult * 10
 		index: index - 1
@@ -204,7 +209,7 @@ load-byte: func [
 	length 	[integer!]
 ][
 	out: 0
-	length: length? value 
+	length: length? value
 	out: switch length [
 		1 	[
 			load-digit value/1
@@ -216,7 +221,7 @@ load-byte: func [
 			(100 * load-digit value/1) + (10 * load-digit value/2) + load-digit value/3
 		]
 	]
-	int-to-byte out 
+	int-to-byte out
 ]
 
 
@@ -229,7 +234,6 @@ load-byte: func [
 #define back(string)(string - 1)
 #define tail?(string)(string/1 = null-byte)
 #define end?(string)(string/1 = null-byte)
-
 
 equal-string?: func [
 	; compare two strings
@@ -259,7 +263,7 @@ match-string: func [
 	substring	[c-string!]
 	return:		[logic!]
 ][
-	; main loop 
+	; main loop
 	until [
 		if string/1 <> substring/1 [
 			return false
@@ -276,7 +280,7 @@ find-string: func [
 	"Find substring in string"
 	string	[c-string!]
 	match	[c-string!]
-	return:	[c-string!]	; return index 
+	return:	[c-string!]	; return index
 	/local substring match?
 ][
 	; main loop
